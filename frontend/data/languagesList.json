@@ -1,0 +1,162 @@
+[
+    {
+        "name": "Belarusian",
+        "short": "be",
+        "isDone": false
+    },
+    {
+        "name": "Bosnian",
+        "short": "bs",
+        "isDone": false
+    },
+    {
+        "name": "Bulgarian",
+        "short": "bg",
+        "isDone": false
+    },
+    {
+        "name": "Croatian",
+        "short": "hr",
+        "isDone": false
+    },
+    {
+        "name": "Czech",
+        "short": "cs",
+        "isDone": false
+    },
+    {
+        "name": "Danish",
+        "short": "da",
+        "isDone": false
+    },
+    {
+        "name": "Dutch",
+        "short": "nl",
+        "isDone": false
+    },
+    {
+        "name": "English",
+        "short": "en",
+        "isDone": false
+    },
+    {
+        "name": "Estonian",
+        "short": "et",
+        "isDone": false
+    },
+    {
+        "name": "Finnish",
+        "short": "fi",
+        "isDone": false
+    },
+    {
+        "name": "French",
+        "short": "fr",
+        "isDone": false
+    },
+    {
+        "name": "Georgian",
+        "short": "ka",
+        "isDone": false
+    },
+    {
+        "name": "German",
+        "short": "de",
+        "isDone": false
+    },
+    {
+        "name": "Greek",
+        "short": "el",
+        "isDone": false
+    },
+    {
+        "name": "Irish",
+        "short": "ga",
+        "isDone": false
+    },
+    {
+        "name": "Italian",
+        "short": "it",
+        "isDone": false
+    },
+    {
+        "name": "Japanese",
+        "short": "ja",
+        "isDone": false
+    },
+    {
+        "name": "Kannada",
+        "short": "kn",
+        "isDone": false
+    },
+    {
+        "name": "Lithuanian",
+        "short": "lt",
+        "isDone": false
+    },
+    {
+        "name": "Luxembourgish",
+        "short": "lb",
+        "isDone": false
+    },
+    {
+        "name": "Norwegian",
+        "short": "no",
+        "isDone": false
+    },
+    {
+        "name": "Polish",
+        "short": "pl",
+        "isDone": false
+    },
+    {
+        "name": "Portuguese",
+        "short": "pt",
+        "isDone": false
+    },
+    {
+        "name": "Romanian",
+        "short": "ro",
+        "isDone": false
+    },
+    {
+        "name": "Russian",
+        "short": "ru",
+        "isDone": false
+    },
+    {
+        "name": "Serbian",
+        "short": "sr",
+        "isDone": false
+    },
+    {
+        "name": "Slovak",
+        "short": "sk",
+        "isDone": false
+    },
+    {
+        "name": "Slovenian",
+        "short": "sl",
+        "isDone": false
+    },
+    {
+        "name": "Spanish",
+        "short": "es",
+        "isDone": false
+    },
+    {
+        "name": "Swedish",
+        "short": "sv",
+        "isDone": false
+    },
+    {
+        "name": "Turkish",
+        "short": "tr",
+        "isDone": false
+    },
+    {
+        "name": "Ukrainian",
+        "short": "uk",
+        "isDone": false
+    }
+]
