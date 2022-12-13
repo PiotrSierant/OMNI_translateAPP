@@ -29,7 +29,7 @@
                         <p v-if="showSuccessAlertDelete" class="showSuccessAlert">Successfully delete</p>
                         <p v-if="showErrorAlertDelete" class="showErrorAlert">Something went wrong, the record has not been deleted</p>
 
-                        <li class="element_in_list" v-for="[key, value], index in showedData" :key="index">     
+                        <li class="element_in_list" v-for="[key, value], index in filteredList" :key="index">     
                             <section class="element_in_list_detail">
                                 "{{ key }}": "{{ value }}"
                                 <section class="element_in_list__buttons">
@@ -81,7 +81,7 @@ export default {
             dismissCountDownError: 0,
             showDismissibleAlert: false,
             // DO POKAZANIA ELEMENTÓW W EDIT 
-            showedData: {},
+            showedData: [],
             showed: null,
             // POKAZANIE FORMULARZY PO KLIKNIĘCIU W OŁÓWEK
             showEditForm: null,
@@ -106,7 +106,7 @@ export default {
             showErrorAlertDelete: false,
             loadingDeleteForm: false,
 
-            search: null,
+            search: '',
         }
     },
     methods: {
