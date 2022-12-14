@@ -24,8 +24,8 @@
     </div>
 </template>
 <script>
-import languagesData from '../../../data/languagesList.json';
 import axios from 'axios';
+import languagesData from '../../../data/languagesList.json';
 import ComponentForm from './Form/ComponentForm';
 import ComponentEdit from './Edit/ComponentEdit';
 import ComponentList from './List/ComponentList';

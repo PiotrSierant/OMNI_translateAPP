@@ -1,17 +1,15 @@
 <template>
   <div id="app">
-          <ComponentAddNewLanguages />
+    <ComponentAddNewLanguages />
   </div>
 </template>
 
 <script>
 import ComponentAddNewLanguages from '@/components/Main/ComponentAddNewLanguages.vue';
-// import ComponentListLang from '@/components/Main/ComponentListLang.vue';
 export default {
   name: 'App',
   components: {
     ComponentAddNewLanguages,
-    // ComponentListLang,
   },
 }
 </script>

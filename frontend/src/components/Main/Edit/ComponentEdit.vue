@@ -2,17 +2,17 @@
     <section class="edit_wrapper">
         <section class="button_wrapper">
             <button @click="download" class="btn_form_edit">Download File <font-awesome-icon icon="fa-solid fa-file-arrow-down" /></button>
-            <b-button v-b-modal="('en')" @click="getLangEn('en')" class="btn_form_edit">Edit file <font-awesome-icon icon="fa-solid fa-pencil" /></b-button>
-                <b-modal :id="('en')" scrollable size="xl"
+            <b-button v-b-modal="('pl')" @click="getLangPl('pl')" class="btn_form_edit">Edit file <font-awesome-icon icon="fa-solid fa-pencil" /></b-button>
+                <b-modal :id="('pl')" scrollable size="xl"
                     :title="('Editing the base translation object')">
                     <p class="my-4">
                     <ul class="list-unstyled">
                         <h6>Add new translation</h6>
                         <form @submit="onSubmitNew" class="addNewItem">
                             <section class="form_section">
-                                <b-form-input v-model="new_key"></b-form-input>
+                                <b-form-input v-model="new_key" @blur="valueTrim($event)" :class="{ wrongKey: isWrongKey }"></b-form-input>
                                 <b-form-input v-model="new_value"></b-form-input>
-                                <button class="sendButton" :disabled="this.new_key && this.new_value ? false  : true" >Send <font-awesome-icon icon="fa-solid fa-check" /></button>
+                                <button class="sendButton" :disabled="this.new_key && this.new_value && !this.isWrongKey ? false  : true" >Send <font-awesome-icon icon="fa-solid fa-check" /></button>
                             </section>
                             <b-spinner variant="primary" v-if="loadingFormNew"></b-spinner>
                             <p v-if="showSuccessAlert" class="showSuccessAlert">Save new record</p>
@@ -106,10 +106,17 @@ export default {
             showErrorAlertDelete: false,
             loadingDeleteForm: false,
 
+            isWrongKey: false,
+
             search: '',
         }
     },
     methods: {
+        valueTrim(event) {
+            this.new_key = event.target.value.trim()
+            const checkNewKey = this.new_key.split(' ');
+            checkNewKey.length > 1 ? this.isWrongKey = true : this.isWrongKey = false
+        },
         /* WYSYŁKA NOWEGO KLUCZA I WARTOŚCI */
         async onSubmitNew(event) {
             event.preventDefault();
@@ -127,7 +134,7 @@ export default {
                     value: `${this.new_value}`,
                 },
             }).then((response) => {
-                this.showedData = Object.entries(response.data.en);
+                this.showedData = Object.entries(response.data.pl);
                 this.showAlertNewForm('success');
             }).catch(() => {
                 this.showAlertNewForm('error');
@@ -156,7 +163,7 @@ export default {
                 method: 'put',
                 url: `http://localhost:3000/put/${this.key_text}&${this.value_text}&${this.old_key}`,
             }).then((response) => { 
-                this.showedData = Object.entries(response.data.en); 
+                this.showedData = Object.entries(response.data.pl); 
                 this.showEditForm = -1;
                 this.showAlertUpdateForm('success');
             }).catch(() => { 
@@ -183,7 +190,7 @@ export default {
                 method: 'delete',
                 url: `http://localhost:3000/delete/${key}`,
             }).then((response) => { 
-                this.showedData = Object.entries(response.data.en); 
+                this.showedData = Object.entries(response.data.pl); 
                 this.showAlertDeleteForm('success')
             }).catch(() => { 
                     this.showAlertDeleteForm('false')
@@ -202,8 +209,8 @@ export default {
             }, 3000)
         },
 
-        /* FUNKCJA DO POBRANIA OBIEKTU ANGIELSKIEGO */
-        async getLangEn(data) {
+        /* FUNKCJA DO POBRANIA OBIEKTU POLSKIEGO */
+        async getLangPl(data) {
             this.showed = data
             await this.axios({
                 method: 'get',
@@ -266,7 +273,10 @@ export default {
             return this.showedData.filter(element => {
                 return element[0].toLowerCase().includes(this.search.toLowerCase())
             })
-        }
+        },
+        textTrimed () {
+            return this.new_key.trim()
+        },
     }
 }
 </script>
@@ -426,5 +436,10 @@ export default {
 }
 .margin {
     margin-bottom: 1rem;
+}
+.wrongKey {
+    border: 2px solid #bb2d3b;
+    background-color: #DC3545;
+    color: whitesmoke;
 }
 </style>

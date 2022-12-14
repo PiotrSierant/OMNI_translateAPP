@@ -3,12 +3,31 @@ import util from 'util';
 import cors from 'cors';
 import express from 'express';
 import bodyParser from 'body-parser';
-import { getEn, getAll, getOne } from '../data/i18n.js';
+import { getPl, getAll, getOne } from '../data/i18n.js';
+import { getValue, getKeys } from '../helpers/helpers.js';
 import { translate } from '@vitalets/google-translate-api';
+// import translate from 'google-translate-api';
 
-async function translateText(string, lang) {
-    // const { text } = await translate('hello world', { to: lang})        /* zwróc przetłumaczony tekst z google api                             */ 
-    const text = Promise.resolve('translated text');                    /* zamokowanie funkcji tłumaczącej                                      */
+// console.log(getKeys()) /* klucze obiektu pl */
+// console.log(getValue()) /* wartości obiektu pl */
+
+/* przykład łączenia dwóch tablic w obiekt klucz wartość
+
+const arr1 = ['name', 'age', 'country'];
+const arr2 = ['Tom', 30, 'Chile'];
+
+const obj = {};
+
+arr1.forEach((element, index) => {
+  obj[element] = arr2[index];
+});
+
+*/
+
+async function translateText(key, string, lang) {
+    const { text } = await translate(string, { from: 'pl', to: lang})        /* zwróc przetłumaczony tekst z google api                             */ 
+    console.log(`${key}: '${text}'`)
+    // const text = Promise.resolve('translated text');                 /* zamokowanie funkcji tłumaczącej                                      */
     return text                                                         /* zwrócenie przetłumaczonego tekstu                                    */
 }
 
@@ -35,23 +54,23 @@ router.get('/getOne/:lang', (req, res) => {                             /* pobra
 
 router.use(bodyParser.json());
 router.get('/sendform/:lang', (req, res) => {                           /* dodanie tłumaczenia do pliku z formularza z frontendu                */
-    const en = getEn();                                                 /* pobranie obiektu angielskiego                                        */
+    const pl = getPl();                                                 /* pobranie obiektu angielskiego                                        */
     const messages = getAll();                                          /* pobranie wszystkich obiektów przetłumaczonych                        */
     const newLanguages = {};                                            /* stworzenie pustego obiektu w celu dodania tłumaczeń                  */
     const lang = req.params.lang;                                       /* pobranie parametru lang, który wskazuje na jaki języch tłumaczymy    */
-    const data = async function getTranslateObject(lang) {              /* funkcja asynchronicza która zapewnia gotowy obiekt z tłumaczeniami   */
-        for (const [key, value] of Object.entries(en)) {                /* przejście po kluczach i wartościach obiektu angielskiego             */
-            const data = await translateText(value, lang);              /* wywołanie funkcji tłumaczącej                                        */
+    const data = async function getTranslateObject(lang) { 
+        for (const [key, value] of Object.entries(pl)) {                /* przejście po kluczach i wartościach obiektu angielskiego             */
+            const data = await translateText(key, value, lang);              /* wywołanie funkcji tłumaczącej                                        */
             newLanguages[key] = data;                                   /* zapisanie do obiektu klucza i przetłumaczonej wartości               */
         }
         return newLanguages                                             /* zwrócenie gotowego obiektu z tłumaczeniami                           */
     }
-    data()                                                              /* wywołanie funkcji asynchronicznej                                    */
+    data(lang)                                                              /* wywołanie funkcji asynchronicznej                                    */
     .then(response => {
         messages[lang] = response;                                      /* dopisanie do obiektu nowego tłumaczenia                              */
         fs.writeFileSync('./data/i18n.js',                              /* Zapis do pliku */ 
-`export function getEn() {
-    return messages.en;
+`export function getPl() {
+    return messages.pl;
 }      
 export function getAll() {
     return messages
@@ -85,8 +104,8 @@ router.delete('/delete/:key', (req, res) => { // usunięcie danego rekordu z ka�
             delete messages[lang][`${key}`];                                    /* usunięcie w każdym języku danego rekordu   */
         }   
         fs.writeFileSync('./data/i18n.js',                                      /* zapis do pliku                             */ 
-`export function getEn() {
-    return messages.en;
+`export function getPl() {
+    return messages.pl;
 }                
 export function getAll() {
     return messages
@@ -110,18 +129,18 @@ router.put('/put/:key&:value&:old_key', (req, res) => {                         
         const old_key = req.params.old_key;                                             /* pobranie starego klucza                        */   
         if(old_key === key) {                                                           /* jeśli klucz się nie zmienił                    */
             for (const lang in messages) {                                              /* przejdź po obiektach i tłumacz                 */
-                if(lang === 'en') {                                                     /* jeśli język to angielski                       */
+                if(lang === 'pl') {                                                     /* jeśli język to angielski                       */
                     messages[lang][`${old_key}`] = value                                /* zaaktualizuj tylko wartość value               */
                 } else {                                                                /* w innym przypadku                              */
                     const translatedValue = async function getTranslateValue(lang) {    /* tłumaczenie value do każdego języka            */
-                        return await translateText(value, lang);                        /* zwróć przetłumaczoną wartość                   */
+                        return await translateText(key, value, lang);                        /* zwróć przetłumaczoną wartość                   */
                     } 
-                    translatedValue()                                                   /* wywołanie funkcji                              */
+                    translatedValue(lang)                                                   /* wywołanie funkcji                              */
                     .then(response => {
-                         messages[lang][`${old_key}`] = response;                       /* Dodanie nowego rekordu do obiektu message      */
-/* Zapis do pliku */    fs.writeFileSync('./data/i18n.js', `
-export function getEn() {
-    return messages.en;
+                        messages[lang][`${old_key}`] = response;                        /* Dodanie nowego rekordu do obiektu message      */
+                        fs.writeFileSync('./data/i18n.js',                              /* Zapis do pliku                                 */ 
+`export function getPl() {
+    return messages.pl;
 }     
 export function getAll() {
     return messages
@@ -136,18 +155,18 @@ export function getOne(lang) {
         else {                                                                          /* w innym przypadku                              */
             for (const lang in messages) {                                              /* przejdź po obiektach i tłumacz                 */
                 delete messages[lang][`${old_key}`];                                    /* Usuń stary wpis po kluczu z każdego języka     */
-                if(lang === 'en') {                                                     /* jeśli język to angielski                       */
+                if(lang === 'pl') {                                                     /* jeśli język to angielski                       */
                     messages[lang][`${key}`] = value;                                   /* dodaj nowy rekord klucz : wartość              */
                 } else {                                                                /* w innym przypadku                              */
                     const translatedValue = async function getTranslateValue(lang) {    /* tłumaczenie value do każdego języka            */
-                        return await translateText(value, lang);                        /* zwróć przetłumaczoną wartość                   */
+                        return await translateText(key, value, lang);                        /* zwróć przetłumaczoną wartość                   */
                     } 
-                    translatedValue()                                                   /* wywołanie funkcji                              */
+                    translatedValue(lang)                                                   /* wywołanie funkcji                              */
                     .then(response => { 
                         messages[lang][`${key}`] = response;                            /* przypisanie przetłumaczonej wartości do klucza */
                         fs.writeFileSync('./data/i18n.js',                              /* Zapis do pliku                                 */         
-`export function getEn() {
-    return messages.en;
+`export function getPl() {
+    return messages.pl;
 }       
 export function getAll() {
     return messages
@@ -172,19 +191,19 @@ router.post('/post', (req, res) => {
         const key = req.body.key;                                                       /* pobranie klucza                                */ 
         const value = req.body.value;                                                   /* pobranie wartości                              */ 
         for(const lang in messages) {
-            if(lang === 'en') { 
+            if(lang === 'pl') { 
                 if(messages[lang][`${key}`] === key) return res.status(400).send('The given key exists').end() /* sprawdz czy istnieje taki klucz */
                 messages[lang][`${key}`] = value;
             } else {
                 const translatedValue = async function getTranslateValue(lang) {        /* tłumaczenie value do każdego języka            */
-                    return await translateText(value, lang);                            /* zwróć przetłumaczoną wartość                   */
+                    return await translateText(key, value, lang);                            /* zwróć przetłumaczoną wartość                   */
                 } 
-                translatedValue()                                                       /* wywołanie funkcji                              */
+                translatedValue(lang)                                                       /* wywołanie funkcji                              */
                     .then(response => { 
                         messages[lang][`${key}`] = response;                            /* przypisanie przetłumaczonej wartości do klucza */
                         fs.writeFileSync('./data/i18n.js',                              /* Zapis do pliku                                 */         
-`export function getEn() {
-    return messages.en;
+`export function getPl() {
+    return messages.pl;
 }
 export function getAll() {
     return messages

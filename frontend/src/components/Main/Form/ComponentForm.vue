@@ -1,26 +1,26 @@
 <template>
-        <section>
-            <section class="section_choice">
-                <label for="select" class="left_section">
-                    <select v-model="childLang" @change="updateSelect()">
-                        <option selected disabled>Choose language</option>
-                        <option v-for="langObject in languages" :key="langObject.short"
-                            :value="langObject.name" :disabled="langObject.isDone">
-                            {{
-                                    langObject.name
-                            }}
-                        </option>
-                    </select>
-                </label>
-                <section class="right_section">
-                    <p v-show="lang !== 'Choose language'">Your choice: <span>{{ lang }}</span></p>
-                </section>
-            </section>
-            <section class="btn_spinner_section">
-                <b-spinner variant="primary" v-if="loader" class="spinner"></b-spinner>
-                <button :disabled="lang === 'Choose language'" class="btn_form margin" v-else>Generate <font-awesome-icon icon="fa-solid fa-file-circle-plus" /></button>
+    <section>
+        <section class="section_choice">
+            <label for="select" class="left_section">
+                <select v-model="childLang" @change="updateSelect()">
+                    <option selected disabled>Choose language</option>
+                    <option v-for="langObject in languages" :key="langObject.short"
+                        :value="langObject.name" :disabled="langObject.isDone">
+                        {{
+                            langObject.name
+                        }}
+                    </option>
+                </select>
+            </label>
+            <section class="right_section">
+                <p v-show="lang !== 'Choose language'">Your choice: <span>{{ lang }}</span></p>
             </section>
         </section>
+        <section class="btn_spinner_section">
+            <b-spinner variant="primary" v-if="loader" class="spinner"></b-spinner>
+            <button :disabled="lang === 'Choose language'" class="btn_form margin" v-else>Generate <font-awesome-icon icon="fa-solid fa-file-circle-plus" /></button>
+        </section>
+    </section>
 </template>
 
 <script>
@@ -29,7 +29,6 @@ export default {
     data: () => {
         return {
             childLang: 'Choose language' || this.lang,
-
         }
     },
 
