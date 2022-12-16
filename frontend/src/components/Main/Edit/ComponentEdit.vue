@@ -1,7 +1,44 @@
 <template>
     <section class="edit_wrapper">
         <section class="button_wrapper">
-            <button @click="download" class="btn_form_edit">Download File <font-awesome-icon icon="fa-solid fa-file-arrow-down" /></button>
+            <button @click="download" class="btn_form_edit">Download file <font-awesome-icon icon="fa-solid fa-file-arrow-down" /></button>
+            <b-button v-b-modal.plvalue @click="getLangPlkey('pl')" class="btn_form_edit">Download key <font-awesome-icon icon="fa-solid fa-file-arrow-down" /></b-button>
+            <b-modal id="plvalue" scrollable size="xl"
+                :title="('Your value from i18n file')">
+                <b-form-file
+                    v-model="file1"
+                    accept=".txt"
+                    id="file-small" size="sm"
+                    class="formInput"
+                    plain
+                    @change="onFileChange"
+                />
+                <section class="information_generation">
+                    <div class="buttonAndSpinner">
+                        <button v-if="content" class="btn_form_edit" @click="addTranslateTofile">Generuj</button>
+                        <b-spinner variant="primary" v-if="content && loaderGeneration"></b-spinner>
+                    </div>
+                    <p v-if="showSuccessAlert" class="showSuccessAlert">Save new lang</p>
+                    <p v-if="showErrorAlert" class="showErrorAlert">Something went wrong, check server</p>
+                    <p v-if="filename">From <b>pl</b> to lang: <b>{{ this.filename }}</b></p>
+                </section>
+                <ul class="list-unstyled">
+                    <li class="element_in_list value" v-for="[key, value] of filteredList" :key="key">{{ value }}"</li>
+                </ul>
+
+                <template #modal-footer="{ cancel }">
+                    <b-button size="sm" variant="success" @click="copy()">
+                        Copy <font-awesome-icon icon="fa-solid fa-copy" />
+                    </b-button>
+                    <b-button size="sm" variant="primary" @click="downloadKey">
+                        Download <font-awesome-icon icon="fa-solid fa-file-arrow-down" />
+                    </b-button>
+                    <b-button size="sm" variant="danger" @click="cancel()">
+                        Wyjdź <font-awesome-icon icon="fa-solid fa-right-from-bracket" />
+                    </b-button>
+                </template>
+            </b-modal>
+
             <b-button v-b-modal="('pl')" @click="getLangPl('pl')" class="btn_form_edit">Edit file <font-awesome-icon icon="fa-solid fa-pencil" /></b-button>
                 <b-modal :id="('pl')" scrollable size="xl"
                     :title="('Editing the base translation object')">
@@ -109,6 +146,11 @@ export default {
             isWrongKey: false,
 
             search: '',
+            file1: null,
+            content: null,
+            filename: null,
+            onlyKey: [],
+            loaderGeneration: false,
         }
     },
     methods: {
@@ -149,12 +191,14 @@ export default {
             this.loadingFormNew = false;
             this.new_key = null,
             this.new_value = null,
+            this.loaderGeneration = false;
+            this.filename = null;
+            this.content = null;
             setTimeout(() => {
                 this.showSuccessAlert = false
                 this.showErrorAlert = false
             }, 3000)
         },  
-        
         /* UPDATE KLUCZA I WARTOŚCI */
         async onSubmit(event) {
             event.preventDefault();
@@ -182,7 +226,6 @@ export default {
                 this.showErrorAlertUpdate = false
             }, 3000)
         },  
-
         /* USNIĘCIE DANEGO POLA */
         async handleDeleteElement(key) {
             this.loadingDeleteForm = true;
@@ -208,8 +251,6 @@ export default {
                 this.showErrorAlertDelete = false
             }, 3000)
         },
-
-        /* FUNKCJA DO POBRANIA OBIEKTU POLSKIEGO */
         async getLangPl(data) {
             this.showed = data
             await this.axios({
@@ -219,7 +260,18 @@ export default {
                 .then((response) => { this.showedData = (Object.entries(response.data)); this.$forceUpdate; })
                 .catch((error) => { console.log(error); });
         },
+        /* FUNKCJA DO POBRANIA OBIEKTU POLSKIEGO */
+        async getLangPlkey(data) {
+            this.showed = data
+            await this.axios({
+                method: 'get',
+                url: `http://localhost:3000/getOne/${data}`,
+            })
+                .then((response) => { this.showedData = (Object.entries(response.data)); this.$forceUpdate; })
+                .catch((error) => { console.log(error); });
 
+           this.downloadKey()
+        },
         /* FUNKCJA DO POKAZANIA FORMULARZA PO KLIKNIĘCIU W OŁÓWEK */
         handleShowEditForm(key, value, index) {
             this.showEditForm = index;
@@ -227,7 +279,6 @@ export default {
             this.value_text = value;
             this.old_key = key;
         },
-
         /* FUNKCJA SCIĄGAJĄCA PLIK */
         async download() {
             this.loading = true;
@@ -256,7 +307,20 @@ export default {
             })
             this.$forceUpdate();
         },
-
+        async downloadKey() {
+            const text = document.querySelector(".list-unstyled").innerHTML;
+            const text2 = text.replace(/<[^>]*>?/gm, '');
+            const text3 = text2.replaceAll('"', '\n');
+            let filename = 'value.txt';
+            let element = document.createElement('a');
+            element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(text3));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            window.open('https://www.onlinedoctranslator.com/en/translationform','_blank');
+        },
         /* ALERTY DO POBRANIA PLIKU */
         countDownChanged(dismissCountDown) {
             this.dismissCountDown = dismissCountDown
@@ -267,6 +331,57 @@ export default {
         showAlertError() {
             this.dismissCountDownError = this.dismissSecs
         },
+        async copy() {
+            const text = document.querySelector(".list-unstyled").innerHTML;
+            const text2 = text.replace(/<[^>]*>?/gm, '');
+            const text3 = text2.replaceAll('"', '\n');
+            navigator.clipboard.writeText(`${text3}`).then(function () {
+                console.log('Async: Copying to clipboard was successful!');
+            }, function (err) {
+                console.error('Async: Could not copy text: ', err);
+            });
+        },
+        onFileChange(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            } 
+            const name = event.target.files[0].name.split('.')
+            this.filename = name[2]
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.content = e.target.result.split('\n');
+            };
+            reader.readAsText(file);
+            // eslint-disable-next-line no-unused-vars
+            for(const [key, _] of this.filteredList) {
+                this.onlyKey.push(key);
+            }
+        },
+        async addTranslateTofile() {
+            const newObj = {};
+            this.onlyKey.forEach((element, index) => {
+                newObj[element] = this.content[index];
+            });
+            this.loaderGeneration = true;
+            await this.axios({
+                method: 'post',
+                url: `http://localhost:3000/postNewLang`,
+                data: {
+                    lang: this.filename,
+                    dataLang: newObj,
+                },
+            }).then(() => {
+                console.log('success');
+                this.showAlertNewForm('success');
+            }).catch(() => {
+                this.showAlertNewForm('error');
+                this.loaderGeneration = false;
+            }).finally(() => {
+                document.getElementById("file-small").value = "";
+            })
+        }
     },
     computed: {
         filteredList() {
@@ -274,7 +389,7 @@ export default {
                 return element[0].toLowerCase().includes(this.search.toLowerCase())
             })
         },
-        textTrimed () {
+        textTrimed() {
             return this.new_key.trim()
         },
     }
@@ -372,6 +487,9 @@ export default {
         border-top: 1px dashed #333;
     }
 }
+.value {
+    align-items: unset;
+}
 .element_in_list_detail {
     width: 100%;
     display: flex;
@@ -441,5 +559,28 @@ export default {
     border: 2px solid #bb2d3b;
     background-color: #DC3545;
     color: whitesmoke;
+}
+.formInput {
+    width: 100%;
+    border: 1px solid #333;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 5px;
+    background-color: rgb(182, 182, 182);
+    transition: .5s all ease-in-out;
+    &:active, &:hover {
+        background-color: #cce5ff;
+    }
+}
+.information_generation {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.buttonAndSpinner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 </style>

@@ -17,6 +17,7 @@
                         <b-button size="sm" variant="success" @click="copy(lang)">
                             Copy <font-awesome-icon icon="fa-solid fa-copy" />
                         </b-button>
+                       
                         <b-button size="sm" variant="danger" @click="cancel()">
                             Wyjdź <font-awesome-icon icon="fa-solid fa-right-from-bracket" />
                         </b-button>

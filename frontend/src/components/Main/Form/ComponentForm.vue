@@ -16,22 +16,30 @@
                 <p v-show="lang !== 'Choose language'">Your choice: <span>{{ lang }}</span></p>
             </section>
         </section>
+        <p class="info">If your file is less than 10000 characters</p>
         <section class="btn_spinner_section">
             <b-spinner variant="primary" v-if="loader" class="spinner"></b-spinner>
             <button :disabled="lang === 'Choose language'" class="btn_form margin" v-else>Generate <font-awesome-icon icon="fa-solid fa-file-circle-plus" /></button>
+            <p class="howMany">Your file have: <span :class="[counterValue > 10000 ? 'wrong' : 'correct',]">{{ counterValue }}</span> characters</p>
         </section>
     </section>
 </template>
 
 <script>
+import axios from 'axios';
 export default {
     name: 'ComponentForm',
     data: () => {
         return {
             childLang: 'Choose language' || this.lang,
+            axios,
+            count: [],
+            isEnabled: false,
         }
     },
-
+    created() {
+        this.howMany();
+    },
     props: {
         getValue: {
             type: Function,
@@ -58,12 +66,30 @@ export default {
             }
         }
     },
-
     methods: {
         updateSelect() {
             this.$emit('selectValue', this.childLang);
         },
+        async howMany() {
+            await this.axios({
+                method: 'get',
+                url: `http://localhost:3000/howmany`,
+            })
+                .then((response) => { 
+                    this.count = response.data;
+                })
+                .catch((error) => { console.log(error); });
+        },
     },
+    computed: {
+        counterValue() {
+            let counter = 0;
+            this.count.forEach(element => {
+                counter += element.length;
+            });
+            return counter
+        },
+    }
 };
 </script>
 
@@ -89,8 +115,18 @@ export default {
     display: flex;
     justify-content: center;
     align-self: center;
+    
 }
-
+.info {
+        margin: auto;
+        padding: 5px;
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #721c24;
+        border-radius: 5px;
+        margin-top: 1rem;
+        text-align: center;
+    }
 .right_section {
     display: flex;
     justify-content: center;
@@ -141,5 +177,23 @@ export default {
 select {
     padding: 5px;
     border-radius: 4px;
+}
+.howMany {
+    padding: 5px;
+    margin: auto 0;
+}
+.wrong {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #721c24;
+    border-radius: 5px;
+    padding: 0 5px;
+}
+.correct {
+    background-color: #6aef89;
+    color: #277b3b;
+    border: 1px solid #277b3b;
+    border-radius: 5px;
+    padding: 0 5px;
 }
 </style>
